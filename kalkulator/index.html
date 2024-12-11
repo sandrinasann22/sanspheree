@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Curah Hujan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #ffb4e9e0;
+            text-align: center;
+            
+        }
+        form {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #F72C5B;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .chart {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kalkulator Curah Hujan</h1>
+    <form id="rainfallForm">
+        <label for="rainfall">Curah Hujan (mm):</label>
+        <input type="number" id="rainfall" required>
+
+        <label for="area">Luas Permukaan (m²):</label>
+        <input type="number" id="area" required>
+
+        <label for="efficiency">Faktor Efisiensi (0-1):</label>
+        <input type="number" id="efficiency" step="0.01" min="0" max="1" required>
+
+        <button type="button" onclick="calculateRainfallVolume()">Hitung</button>
+
+        <div class="result" id="result"></div>
+    </form>
+
+    <canvas id="rainfallChart" class="chart"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function calculateRainfallVolume() {
+            // Ambil nilai input dari formulir
+            const rainfall = parseFloat(document.getElementById('rainfall').value);
+            const area = parseFloat(document.getElementById('area').value);
+            const efficiency = parseFloat(document.getElementById('efficiency').value);
+
+            if (isNaN(rainfall) || isNaN(area) || isNaN(efficiency)) {
+                document.getElementById('result').innerText = "Harap isi semua bidang dengan angka valid.";
+                return;
+            }
+
+            // Metode Euler untuk menghitung volume
+            const deltaT = 1; // Asumsi waktu dalam jam
+            let totalVolume = 0;
+            let currentRainfall = rainfall;
+            const volumes = [];
+
+            for (let t = 0; t < 5; t += deltaT) { // Simulasi selama 5 jam
+                const volume = currentRainfall * area * efficiency / 1000; // m³
+                totalVolume += volume;
+                volumes.push(volume);
+                currentRainfall += deltaT * 0; // Tidak ada perubahan hujan dalam waktu kecil (sederhana)
+            }
+
+            // Tampilkan hasil
+            document.getElementById('result').innerText = `Volume Air Hujan yang Terkumpul: ${totalVolume.toFixed(2)} m³`;
+
+            // Visualisasi dengan Chart.js
+            const ctx = document.getElementById('rainfallChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jam 1', 'Jam 2', 'Jam 3', 'Jam 4', 'Jam 5'],
+                    datasets: [{
+                        label: 'Volume Air Hujan (m³)',
+                        data: volumes,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
